@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>numbbook</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        header, footer { background-color: #222; color: white; text-align: center; padding: 1em 0; }
+        main { padding: 20px; max-width: 900px; margin: auto; background-color: white; }
+        section { margin-bottom: 40px; }
+        h2 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        form input, form textarea { width: 100%; padding: 10px; margin-bottom: 10px; }
+        form button { background-color: #222; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .success-message { color: green; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>numbbook</h1>
+    </header>
+    <main>
+        <section id="opis-djela">
+            <h2>Opis djela</h2>
+            <p>"numb" (ili "proces počinje") je autobiografsko, sirovo i brutalno iskreno književno djelo koje razdire iluzije i izlaže stvarnost bez filtera...</p>
+        </section>
+
+        <section id="o-autoru">
+            <h2>O autoru</h2>
+            <p>Autor nije školovani pisac. Dolazi s margine društva, s adresama koje se češće brišu nego pamte...</p>
+        </section>
+
+        <section id="kontakt">
+            <h2>Kontakt forma</h2>
+            <form name="kontakt" method="POST" data-netlify="true">
+                <input type="hidden" name="form-name" value="kontakt">
+                <label for="name">Ime:</label>
+                <input type="text" name="name" id="name" required>
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" required>
+                <label for="message">Poruka:</label>
+                <textarea name="message" id="message" rows="5" required></textarea>
+                <button type="submit">Pošalji</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Igor Šajnović</p>
+    </footer>
+</body>
+</html>
