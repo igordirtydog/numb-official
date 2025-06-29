@@ -1,0 +1,309 @@
+
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <title>numbbook</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #1e1e1e; color: #f2f2f2; margin: 0; padding: 0; line-height: 1.6; }
+    header { background-color: #000; color: #fff; padding: 1rem; text-align: center; }
+    section { padding: 2rem; max-width: 900px; margin: auto; }
+    img { max-width: 100%; display: block; margin: 1rem auto; border-radius: 8px; }
+    h2 { border-bottom: 1px solid #555; padding-bottom: 0.3rem; }
+    form input, form textarea { width: 100%; padding: 0.5rem; margin: 0.5rem 0; border-radius: 4px; border: none; }
+    form button { background-color: #555; color: white; padding: 0.7rem 1.5rem; border: none; cursor: pointer; }
+    .social { text-align: center; margin: 2rem 0; }
+    .social a { color: #1da1f2; margin: 0 10px; text-decoration: none; }
+    .upload-area { margin-top: 1rem; padding: 1rem; border: 1px dashed #777; }
+    .like-btn { background-color: #444; color: white; padding: 5px 10px; margin-right: 10px; border: none; cursor: pointer; }
+    .comments { margin-top: 1rem; }
+    .comment-box { margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>numbbook</h1>
+</header>
+
+<section>
+  <h2>Opis djela</h2>
+  <p>"numb" (ili "proces počinje") je autobiografsko, sirovo i brutalno iskreno književno djelo koje razdire iluzije...</p>
+  <img src="poster.jpg" alt="Naslovnica romana Numb">
+
+  <h2>Izvadak iz romana</h2>
+  <p>Kad bi noć imala zvuk, bio bi to E-mol...</p>
+
+  <h2>O autoru</h2>
+  <p>Autor nije školovani pisac. Dolazi s margine društva...</p>
+  <img src="autor.jpg" alt="Fotografija autora">
+
+  <h2>Poezija</h2>
+  <div id="poezija-content"></div>
+  <div class="upload-area">
+    <input type="file" id="poezija-upload" accept=".txt">
+    <button onclick="uploadText('poezija')">Dodaj pjesmu</button>
+  </div>
+  <button class="like-btn" onclick="like('poezija')">Like (<span id="like-poezija">0</span>)</button>
+  <div class="comments">
+    <textarea id="comment-poezija" placeholder="Komentar..."></textarea>
+    <button onclick="addComment('poezija')">Dodaj komentar</button>
+    <div id="comments-poezija" class="comment-box"></div>
+  </div>
+
+  <h2>Kratke priče</h2>
+  <div id="price-content"></div>
+  <div class="upload-area">
+    <input type="file" id="price-upload" accept=".txt">
+    <button onclick="uploadText('price')">Dodaj priču</button>
+  </div>
+  <button class="like-btn" onclick="like('price')">Like (<span id="like-price">0</span>)</button>
+  <div class="comments">
+    <textarea id="comment-price" placeholder="Komentar..."></textarea>
+    <button onclick="addComment('price')">Dodaj komentar</button>
+    <div id="comments-price" class="comment-box"></div>
+  </div>
+
+  <h2>Audio sadržaji</h2>
+  <div id="audio-content"></div>
+  <div class="upload-area">
+    <input type="file" id="audio-upload" accept="audio/*">
+    <button onclick="uploadAudio()">Dodaj audio</button>
+  </div>
+  <button class="like-btn" onclick="like('audio')">Like (<span id="like-audio">0</span>)</button>
+  <div class="comments">
+    <textarea id="comment-audio" placeholder="Komentar..."></textarea>
+    <button onclick="addComment('audio')">Dodaj komentar</button>
+    <div id="comments-audio" class="comment-box"></div>
+  </div>
+
+  <h2>Podijeli stranicu</h2>
+  <div class="social">
+    <a href="#" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(window.location.href));return false;">Facebook</a>
+    <a href="#" onclick="window.open('https://twitter.com/intent/tweet?url='+encodeURIComponent(window.location.href));return false;">Twitter</a>
+    <a href="#" onclick="window.open('https://www.linkedin.com/shareArticle?mini=true&url='+encodeURIComponent(window.location.href));return false;">LinkedIn</a>
+  </div>
+
+  <h2>Kontakt forma</h2>
+  <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <input type="text" name="ime" placeholder="Ime" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <textarea name="poruka" rows="5" placeholder="Poruka" required></textarea>
+    <button type="submit">Pošalji</button>
+  </form>
+</section>
+
+<section>
+  <h3>Dodaj novi blog post</h3>
+  <form id="blogForm" onsubmit="addBlogPost(); return false;" style="margin-bottom: 1rem;">
+    <textarea id="blogText" placeholder="Upiši svoj blog ovdje..." rows="4" cols="60" style="width:100%; padding:10px;"></textarea><br>
+    <input type="text" id="blogTags" placeholder="Tagovi (npr. ljubav, tuga)" style="width:100%; padding:5px;"><br>
+    <button type="submit" style="margin-top:10px;">Dodaj post</button>
+  </form>
+  <div id="blogPosts"></div>
+</section>
+
+<script>
+function addBlogPost() {
+  const text = document.getElementById("blogText").value.trim();
+  const tags = document.getElementById("blogTags").value.trim();
+  if (!text) return;
+  const div = document.createElement("p");
+  div.innerText = text;
+  div.setAttribute("data-tags", tags);
+  document.getElementById("blogPosts").prepend(div);
+  document.getElementById("blogForm").reset();
+}
+</script>
+
+
+<script>
+function uploadText(type) {
+  const fileInput = document.getElementById(type + '-upload');
+  const reader = new FileReader();
+  reader.onload = function () {
+    const container = document.getElementById(type + '-content');
+    const div = document.createElement('div');
+    div.innerText = reader.result;
+    container.appendChild(div);
+  };
+  if (fileInput.files.length > 0) {
+    reader.readAsText(fileInput.files[0]);
+  }
+}
+
+function uploadAudio() {
+  const fileInput = document.getElementById('audio-upload');
+  const container = document.getElementById('audio-content');
+  if (fileInput.files.length > 0) {
+    const url = URL.createObjectURL(fileInput.files[0]);
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.src = url;
+    container.appendChild(audio);
+  }
+}
+
+function like(type) {
+  const countSpan = document.getElementById('like-' + type);
+  let count = parseInt(countSpan.innerText);
+  count++;
+  countSpan.innerText = count;
+}
+
+function addComment(type) {
+  const input = document.getElementById('comment-' + type);
+  const box = document.getElementById('comments-' + type);
+  if (input.value.trim() !== "") {
+    const p = document.createElement('p');
+    p.innerText = input.value;
+    box.appendChild(p);
+    input.value = "";
+  }
+}
+</script>
+
+
+<!-- DODATNA FUNKCIONALNOST: PRETRAGA, TAGOVI, BROJAČ, BLOG SEKCIJA -->
+<script>
+// PRETRAGA
+function searchContent() {
+    let input = document.getElementById("search-box").value.toLowerCase();
+    let sections = document.querySelectorAll("section div, section p");
+    sections.forEach(el => {
+        el.style.display = el.innerText.toLowerCase().includes(input) ? "block" : "none";
+    });
+}
+
+// TAGOVI
+function filterByTag(tag) {
+    let sections = document.querySelectorAll("[data-tags]");
+    sections.forEach(el => {
+        let tags = el.getAttribute("data-tags").split(",");
+        el.style.display = tags.includes(tag) ? "block" : "none";
+    });
+}
+
+// BROJAČ POSJETA (lokalno)
+let visitCount = localStorage.getItem("visitCount") || 0;
+visitCount++;
+localStorage.setItem("visitCount", visitCount);
+window.onload = () => {
+    document.getElementById("counter").innerText = "Broj posjeta: " + visitCount;
+};
+</script>
+
+<style>
+  .tag-button { background: #222; color: #ccc; padding: 5px 10px; margin: 3px; border: 1px solid #444; cursor: pointer; }
+</style>
+
+<div style="padding: 1rem; background-color: #111;">
+  🔍 <input type="text" id="search-box" onkeyup="searchContent()" placeholder="Pretraži sadržaj..." style="width: 60%; padding: 5px;">
+  <div style="margin-top: 1rem;">
+    Filtriraj po tagovima:
+    <button class="tag-button" onclick="filterByTag('ljubav')">Ljubav</button>
+    <button class="tag-button" onclick="filterByTag('tuga')">Tuga</button>
+    <button class="tag-button" onclick="filterByTag('duhovno')">Duhovno</button>
+  </div>
+  <div id="counter" style="margin-top: 1rem; color: #888;"></div>
+</div>
+
+<section>
+  <h2>Blog</h2>
+  <div id="blog">
+    <p data-tags="tuga">Sinoć sam gledao u nebo i pitao se je li išta gore stvarnije od ovoga ovdje.</p>
+    <p data-tags="duhovno">Ponekad osjećam da me vode ruke koje ne vidim, ali im vjerujem.</p>
+  </div>
+</section>
+
+<section>
+  <h3>Dodaj novi blog post</h3>
+  <form id="blogForm" onsubmit="addBlogPost(); return false;" style="margin-bottom: 1rem;">
+    <textarea id="blogText" placeholder="Upiši svoj blog ovdje..." rows="4" cols="60" style="width:100%; padding:10px;"></textarea><br>
+    <input type="text" id="blogTags" placeholder="Tagovi (npr. ljubav, tuga)" style="width:100%; padding:5px;"><br>
+    <button type="submit" style="margin-top:10px;">Dodaj post</button>
+  </form>
+  <div id="blogPosts"></div>
+</section>
+
+<script>
+function addBlogPost() {
+  const text = document.getElementById("blogText").value.trim();
+  const tags = document.getElementById("blogTags").value.trim();
+  if (!text) return;
+  const div = document.createElement("p");
+  div.innerText = text;
+  div.setAttribute("data-tags", tags);
+  document.getElementById("blogPosts").prepend(div);
+  document.getElementById("blogForm").reset();
+}
+</script>
+
+
+
+<!-- SKRIPTA ZA PRETRAGU I BROJAČ -->
+<script>
+function searchContent() {
+    let input = document.getElementById("search-box").value.toLowerCase();
+    let sections = document.querySelectorAll("section div, section p");
+    sections.forEach(el => {
+        el.style.display = el.innerText.toLowerCase().includes(input) ? "block" : "none";
+    });
+}
+function filterByTag(tag) {
+    let sections = document.querySelectorAll("[data-tags]");
+    sections.forEach(el => {
+        let tags = el.getAttribute("data-tags").split(",");
+        el.style.display = tags.includes(tag) ? "block" : "none";
+    });
+}
+let visitCount = localStorage.getItem("visitCount") || 0;
+visitCount++;
+localStorage.setItem("visitCount", visitCount);
+window.onload = () => {
+    document.getElementById("counter").innerText = "Broj posjeta: " + visitCount;
+};
+function addBlogPost() {
+    const text = document.getElementById("blogText").value.trim();
+    const tags = document.getElementById("blogTags").value.trim();
+    if (!text) return;
+    const div = document.createElement("p");
+    div.innerText = text;
+    div.setAttribute("data-tags", tags);
+    document.getElementById("blogPosts").prepend(div);
+    document.getElementById("blogForm").reset();
+}
+</script>
+
+<style>
+  .tag-button { background: #222; color: #ccc; padding: 5px 10px; margin: 3px; border: 1px solid #444; cursor: pointer; }
+</style>
+
+<!-- ALATI I SEKCIJE -->
+<div style="padding: 1rem; background-color: #111;">
+  🔍 <input type="text" id="search-box" onkeyup="searchContent()" placeholder="Pretraži sadržaj..." style="width: 60%; padding: 5px;">
+  <div style="margin-top: 1rem;">
+    Filtriraj po tagovima:
+    <button class="tag-button" onclick="filterByTag('ljubav')">Ljubav</button>
+    <button class="tag-button" onclick="filterByTag('tuga')">Tuga</button>
+    <button class="tag-button" onclick="filterByTag('duhovno')">Duhovno</button>
+  </div>
+  <div id="counter" style="margin-top: 1rem; color: #888;"></div>
+</div>
+
+<!-- BLOG SEKCIJA -->
+<section>
+  <h2>Blog</h2>
+  <form id="blogForm" onsubmit="addBlogPost(); return false;" style="margin-bottom: 1rem;">
+    <textarea id="blogText" placeholder="Upiši svoj blog ovdje..." rows="4" cols="60" style="width:100%; padding:10px;"></textarea><br>
+    <input type="text" id="blogTags" placeholder="Tagovi (npr. ljubav, tuga)" style="width:100%; padding:5px;"><br>
+    <button type="submit" style="margin-top:10px;">Dodaj post</button>
+  </form>
+  <div id="blogPosts">
+    <p data-tags="tuga">Sinoć sam gledao u nebo i pitao se je li išta gore stvarnije od ovoga ovdje.</p>
+    <p data-tags="duhovno">Ponekad osjećam da me vode ruke koje ne vidim, ali im vjerujem.</p>
+  </div>
+</section>
+
+</body>
+</html>
